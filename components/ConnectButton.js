@@ -1,15 +1,16 @@
-import { shorter } from "../utils/utils";
-import { useEffect, useState, Fragment } from "react";
-import { useWeb3React } from "@web3-react/core";
-import { injected } from "../utils/connector";
-import { Dialog, Transition } from '@headlessui/react'
+import {shorter} from "../utils/utils";
+import {useEffect, useState, Fragment} from "react";
+import {useWeb3React} from "@web3-react/core";
+import {injected} from "../utils/connector";
+import {Dialog, Transition} from '@headlessui/react'
 // import { useEagerConnect } from "../hooks/useEagerConnectV2";
 
 
 export default function ConnectButton() {
 
     // const [tried, isWrong] = useEagerConnect();
-    const { active, account, activate, chainId } = useWeb3React();
+    const {active, account, activate, chainId, deactivate} = useWeb3React();
+    console.log(active)
     const [failed, setFailed] = useState(false);
 
     const [isErrorOpen, setIsErrorOpen] = useState(false)
@@ -23,10 +24,11 @@ export default function ConnectButton() {
         activate(injected, undefined, true).catch((error) => {
             if (error.name.includes('UnsupportedChainIdError') || error.message.includes('Unsupported')) {
                 setFailed(true)
+            } else {
+                console.log('activate...onCatch')
+                console.log(error)
+                console.log('activate...onCatch')
             }
-            console.log('activate...onCatch')
-            console.log(error)
-            console.log('activate...onCatch')
         })
     }
 
@@ -50,6 +52,10 @@ export default function ConnectButton() {
         });
     }
 
+    const disconnect = () => {
+        deactivate()
+    }
+
     const closeErrorModal = () => {
         setIsErrorOpen(false)
     }
@@ -59,28 +65,33 @@ export default function ConnectButton() {
 
     return (
         <div>
-            {active && (chainId === 1 || chainId === 1337 || chainId === 5777 || chainId == 4) && (
-                <button onClick={connect} className="px-2 py-1 rounded-md bg-red-500 text-gray-900">
+            {active && (chainId === 1 || chainId === 1337 || chainId === 5777 || chainId === 4) && (
+                <button className="px-2 py-1 rounded-md bg-ukraine-yellow text-ukraine-blue">
                     Connected {shorter(account)}
                 </button>
             )}
             {!active && !failed && (
-                <button onClick={connect} className="px-2 py-1 rounded-md bg-purple-400 text-gray-900">
-                    <div>Connect Wallet</div>
-                </button>
+                <div onClick={connect}
+                     className="border-blue-700 px-2 py-1 rounded-md bg-ukraine-blue border-2 text-ukraine-yellow">
+                    <div>Connect Wallet....</div>
+                </div>
             )}
             {(failed || (active && chainId !== 1 && chainId !== 1337 && chainId !== 5777 && chainId !== 4)) && (
-                <div data-tip="Please switch to Mainnet" className="tooltip tooltip-open tooltip-bottom">
-                    <button onClick={connect} className="px-2 py-1 rounded-md bg-red-500 text-gray-900">
-                        <div>Wrong Network</div>
-                    </button>
+                <div onClick={connect}
+                     className="border-blue-700 px-2 py-1 rounded-md bg-ukraine-yellow border-2 text-ukraine-blue">
+                    <div>Please switch to Mainnet</div>
                 </div>
+                    // <div data-tip="Please switch to Mainnet" className="tooltip tooltip-open tooltip-bottom text-ukraine-blue z-30">
+                    //     <button onClick={connect} className="px-2 py-1 rounded-md bg-ukraine-yellow text-ukraine-blue z-20">
+                    //         <div >Wrong Network</div>
+                    //     </button>
+                    // </div>
             )}
 
             <Transition appear show={isErrorOpen} as={Fragment}>
                 <Dialog
                     as="div"
-                    className="fixed inset-0 z-10 overflow-y-auto"
+                    className="fixed inset-0 overflow-y-auto"
                     onClose={closeErrorModal}
                 >
                     <div className="min-h-screen px-4 text-center">
@@ -93,7 +104,7 @@ export default function ConnectButton() {
                             leaveFrom="opacity-100"
                             leaveTo="opacity-0"
                         >
-                            <Dialog.Overlay className="fixed inset-0" />
+                            <Dialog.Overlay className="fixed inset-0"/>
                         </Transition.Child>
 
                         {/* This element is to trick the browser into centering the modal contents. */}
